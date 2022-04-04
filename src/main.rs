@@ -98,7 +98,7 @@ fn main() -> std::io::Result<()>  {
                     println!("{}", current_offset - signature_byte_to_check as u64);
                 }
                 else {
-                    println!("{:016X}", current_offset - signature_byte_to_check as u64);
+                    println!("{:X}", current_offset - signature_byte_to_check as u64);
                 }
                 total_matches += 1;
 
