@@ -16,7 +16,11 @@ struct Args {
 
     /// Number of matches (printing on each line). Set to 0 to find all.
     #[clap(short, long, default_value_t = 1)]
-    matches: u64
+    matches: u64,
+
+    /// Print the result(s) in decimal instead of hexadecimal.
+    #[clap(short, long)]
+    decimal: bool
 }
 
 fn main() -> std::io::Result<()>  {
@@ -90,7 +94,12 @@ fn main() -> std::io::Result<()>  {
         if matches {
             signature_byte_to_check += 1;
             if signature_byte_to_check == sig_length {
-                println!("{:016X}", current_offset - signature_byte_to_check as u64);
+                if args.decimal {
+                    println!("{}", current_offset - signature_byte_to_check as u64);
+                }
+                else {
+                    println!("{:016X}", current_offset - signature_byte_to_check as u64);
+                }
                 total_matches += 1;
 
                 if total_matches == args.matches && args.matches != 0 {
