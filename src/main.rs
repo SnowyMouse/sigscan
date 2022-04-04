@@ -12,7 +12,11 @@ struct Args {
     file_path: String,
 
     /// Signature to look for (e.g. "00??AABBCCDD")
-    signature: String
+    signature: String,
+
+    /// Number of matches (printing on each line). Set to 0 to find all.
+    #[clap(short, long, default_value_t = 1)]
+    matches: u64
 }
 
 fn main() -> std::io::Result<()>  {
@@ -69,6 +73,8 @@ fn main() -> std::io::Result<()>  {
     // Loop until we are done
     let mut buffer = [0; 1];
     let mut current_offset = 0u64;
+    let mut total_matches = 0u64;
+
     loop {
         if file.read(&mut buffer)? == 0 {
             break;
@@ -85,7 +91,13 @@ fn main() -> std::io::Result<()>  {
             signature_byte_to_check += 1;
             if signature_byte_to_check == sig_length {
                 println!("{:016X}", current_offset - signature_byte_to_check as u64);
-                exit(0);
+                total_matches += 1;
+
+                if total_matches == args.matches && args.matches != 0 {
+                    break;
+                }
+
+                signature_byte_to_check = 0;
             }
         }
         else {
@@ -93,6 +105,12 @@ fn main() -> std::io::Result<()>  {
         }
     }
 
-    println!("none");
-    exit(1);
+    // Check if we matched anything
+    if total_matches != 0 {
+        exit(0);
+    }
+    else {
+        println!("none");
+        exit(1);
+    }
 }
