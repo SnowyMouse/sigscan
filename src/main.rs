@@ -72,54 +72,69 @@ fn main() -> std::io::Result<()>  {
     // Load the file
     let mut file = BufReader::new(File::open(&args.file_path)?);
     let sig_length = signature.len();
-    let mut signature_byte_to_check = 0;
 
     // Loop until we are done
-    let mut buffer = [0; 1];
+    let mut testing = Vec::<u64>::new();
+    let mut confirmed = Vec::<u64>::new();
     let mut current_offset = 0u64;
-    let mut total_matches = 0u64;
 
     loop {
+        let mut buffer = [0u8; 1];
         if file.read(&mut buffer)? == 0 {
             break;
         }
+        let buffer = buffer[0];
 
-        let matches = match signature[signature_byte_to_check] {
-            Some(n) => n == buffer[0],
-            None => true
+        let matches = |sig_offset: u64| -> bool {
+            match signature[sig_offset as usize] {
+                Some(n) => n == buffer,
+                None => true
+            }
         };
 
-        current_offset += 1;
+        testing.retain(|u| {
+            let sig_offset = current_offset - u;
+            if !matches(sig_offset) {
+                false
+            }
+            else if sig_offset + 1 == sig_length as u64 {
+                confirmed.push(*u);
+                false
+            }
+            else {
+                true
+            }
+        });
 
-        if matches {
-            signature_byte_to_check += 1;
-            if signature_byte_to_check == sig_length {
-                if args.decimal {
-                    println!("{}", current_offset - signature_byte_to_check as u64);
-                }
-                else {
-                    println!("{:X}", current_offset - signature_byte_to_check as u64);
-                }
-                total_matches += 1;
-
-                if total_matches == args.matches && args.matches != 0 {
-                    break;
-                }
-
-                signature_byte_to_check = 0;
+        if matches(0) {
+            if sig_length == 1 {
+                confirmed.push(current_offset);
+            }
+            else {
+                testing.push(current_offset);
             }
         }
-        else {
-            signature_byte_to_check = 0;
-        }
+
+        current_offset += 1;
     }
 
     // Check if we matched anything
-    if total_matches != 0 {
-        exit(0);
-    }
-    else {
+    if confirmed.is_empty() {
         println!("none");
         exit(1);
     }
+
+    // Print offsets
+    if args.decimal {
+        for i in confirmed {
+            println!("{i}");
+        }
+    }
+    else {
+        for i in confirmed {
+            println!("{i:X}");
+        }
+    }
+
+    Ok(())
 }

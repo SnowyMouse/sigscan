@@ -1,4 +1,4 @@
-[project]
+[package]
 name = "sigscan"
 description = "Search for a pattern in a file, outputting the offset in hexadecimal or 'none' if not found"
 version = "0.1.0"
