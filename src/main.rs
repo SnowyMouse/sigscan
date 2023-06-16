@@ -78,7 +78,7 @@ fn main() -> std::io::Result<()>  {
     let mut confirmed = Vec::<u64>::new();
     let mut current_offset = 0u64;
 
-    loop {
+    while args.matches == 0 || confirmed.len() < args.matches as usize {
         let mut buffer = [0u8; 1];
         if file.read(&mut buffer)? == 0 {
             break;

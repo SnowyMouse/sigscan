@@ -1,7 +1,7 @@
 [package]
 name = "sigscan"
 description = "Search for a pattern in a file, outputting the offset in hexadecimal or 'none' if not found"
-version = "0.1.1"
+version = "0.1.2"
 
 [dependencies]
 clap = { version = "3.1.6", features = ["derive"] }
